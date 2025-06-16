@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "roles")
+@Entity
+@Table(name = "roles")
 public class RoleEntity extends BaseEntity implements Serializable {
 
   @Id

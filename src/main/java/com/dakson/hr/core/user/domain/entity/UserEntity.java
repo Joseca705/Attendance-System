@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "users")
+@Entity
+@Table(name = "users")
 public class UserEntity extends BaseEntity implements Serializable {
 
   @Id
