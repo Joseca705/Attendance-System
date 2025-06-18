@@ -1,9 +1,10 @@
 package com.dakson.hr.core.user.domain.repository;
 
-import com.dakson.hr.core.user.domain.entity.PersonEntity;
+import com.dakson.hr.core.user.domain.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PersonEntityRepository
-  extends JpaRepository<PersonEntity, Integer> {}
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
+  boolean existsByEmail(String email);
+}

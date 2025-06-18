@@ -31,13 +31,11 @@ public class UserEntity extends BaseEntity implements Serializable {
   public UserEntity(
     String username,
     String password,
-    String email,
-    PersonEntity person
+    Employee employee
   ) {
     this.username = username;
     this.password = password;
-    this.email = email;
-    this.person = person;
+    this.employee = employee;
   }
 
   @Id
@@ -50,12 +48,9 @@ public class UserEntity extends BaseEntity implements Serializable {
   @Column(name = "password", length = 100, nullable = false)
   private String password;
 
-  @Column(name = "email", length = 100, nullable = false, unique = true)
-  private String email;
-
   @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "person_id", referencedColumnName = "id", nullable = false)
-  private PersonEntity person;
+  @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = false)
+  private Employee employee;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<UserRoleEntity> roles;

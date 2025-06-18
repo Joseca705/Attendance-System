@@ -25,9 +25,7 @@ public interface UserEntityRepository
     AND u.status = 'ACTIVE'
     """
   )
-  List<AuthUserFlatDto> findFlatByUsername(
-    @Param("username") String username
-  );
+  List<AuthUserFlatDto> findFlatByUsername(@Param("username") String username);
 
   @Query(
     """
@@ -43,6 +41,4 @@ public interface UserEntityRepository
     """
   )
   List<AuthUserFlatDto> findFlatByUserId(@Param("id") Integer id);
-
-  boolean existsByEmail(String email);
 }

@@ -1,5 +1,6 @@
 package com.dakson.hr.core.authentication.infrastructure.service.implementation;
 
+import com.dakson.hr.app.location.domain.entity.Department;
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
@@ -14,9 +15,9 @@ import com.dakson.hr.core.authorization.domain.entity.RoleEntity;
 import com.dakson.hr.core.authorization.domain.entity.UserRoleEntity;
 import com.dakson.hr.core.authorization.domain.repository.UserRoleEntityRepository;
 import com.dakson.hr.core.user.api.model.response.AuthUserFlatDto;
-import com.dakson.hr.core.user.domain.entity.PersonEntity;
+import com.dakson.hr.core.user.domain.entity.Employee;
 import com.dakson.hr.core.user.domain.entity.UserEntity;
-import com.dakson.hr.core.user.domain.repository.PersonEntityRepository;
+import com.dakson.hr.core.user.domain.repository.EmployeeRepository;
 import com.dakson.hr.core.user.domain.repository.UserEntityRepository;
 import com.dakson.hr.core.user.infrastructure.exception.EmailAlreadyExistsException;
 import java.time.Instant;
@@ -41,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
 
   private final UserEntityRepository userRepository;
-  private final PersonEntityRepository personRepository;
+  private final EmployeeRepository employeeRepository;
   private final UserRoleEntityRepository userRoleRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final BCryptPasswordEncoder passwordEncoder;
@@ -85,21 +86,28 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
   @Override
   @Transactional
   public AuthenticationResponseDto signUp(SignUpRequestDto request) {
-    boolean existsEmail = this.userRepository.existsByEmail(request.email());
+    boolean existsEmail =
+      this.employeeRepository.existsByEmail(request.email());
     if (existsEmail) throw new EmailAlreadyExistsException();
 
-    PersonEntity createdPerson = new PersonEntity(
+    Employee createdeEmployee = new Employee(
       request.firstName(),
-      request.lastName()
+      request.lastName(),
+      request.phoneNumber(),
+      request.email(),
+      request.hireDate(),
+      request.salary(),
+      new Department(request.departmentId()),
+      new Employee(request.managerId())
     );
-    createdPerson.setCreatedBy(0);
-    this.personRepository.save(createdPerson);
+    // TODO: Remove the created by 0, put the user creator instead
+    createdeEmployee.setCreatedBy(0);
+    this.employeeRepository.save(createdeEmployee);
 
     UserEntity createdUser = new UserEntity(
       request.email(),
-      passwordEncoder.encode(request.password()),
-      request.email(),
-      createdPerson
+      passwordEncoder.encode("123"),
+      createdeEmployee
     );
     createdUser.setCreatedBy(0);
     this.userRepository.save(createdUser);
