@@ -22,6 +22,7 @@ public interface UserEntityRepository
     JOIN u.roles ur
     JOIN ur.role r
     WHERE u.username = :username
+    AND u.status = 'ACTIVE'
     """
   )
   List<AuthUserFlatDto> findFlatByUsername(
@@ -42,4 +43,6 @@ public interface UserEntityRepository
     """
   )
   List<AuthUserFlatDto> findFlatByUserId(@Param("id") Integer id);
+
+  boolean existsByEmail(String email);
 }

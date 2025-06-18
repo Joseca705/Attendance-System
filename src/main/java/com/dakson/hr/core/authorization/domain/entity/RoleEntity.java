@@ -27,6 +27,10 @@ import lombok.NoArgsConstructor;
 @Table(name = "roles")
 public class RoleEntity extends BaseEntity implements Serializable {
 
+  public RoleEntity(Integer id) {
+    this.id = id;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;

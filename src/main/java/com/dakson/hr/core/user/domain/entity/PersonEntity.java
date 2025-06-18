@@ -20,6 +20,11 @@ import lombok.NoArgsConstructor;
 @Entity(name = "persons")
 public class PersonEntity extends BaseEntity implements Serializable {
 
+  public PersonEntity(String firstName, String lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;

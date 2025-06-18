@@ -28,11 +28,23 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 public class UserEntity extends BaseEntity implements Serializable {
 
+  public UserEntity(
+    String username,
+    String password,
+    String email,
+    PersonEntity person
+  ) {
+    this.username = username;
+    this.password = password;
+    this.email = email;
+    this.person = person;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "username", length = 100, nullable = false)
+  @Column(name = "username", length = 100, nullable = false, unique = true)
   private String username;
 
   @Column(name = "password", length = 100, nullable = false)

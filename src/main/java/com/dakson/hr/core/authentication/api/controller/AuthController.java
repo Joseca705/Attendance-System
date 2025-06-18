@@ -1,9 +1,12 @@
 package com.dakson.hr.core.authentication.api.controller;
 
+import com.dakson.hr.common.util.CurrentUserJwtUtil;
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
+import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +40,17 @@ public class AuthController {
     AuthenticationResponseDto response =
       this.jwtAuthService.refreshToken(refreshToken);
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/signup")
+  public ResponseEntity<AuthenticationResponseDto> signUp(
+    @RequestBody SignUpRequestDto newUser
+  ) {
+    AuthenticationResponseDto createdUser = this.jwtAuthService.signUp(newUser);
+    Integer currentUser = CurrentUserJwtUtil.getCurrentUserId();
+
+    return ResponseEntity.created(
+      URI.create(String.format("/api/user/%s", currentUser))
+    ).body(createdUser);
   }
 }

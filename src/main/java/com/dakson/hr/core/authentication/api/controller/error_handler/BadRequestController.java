@@ -4,6 +4,7 @@ import com.dakson.hr.core.authentication.api.model.response.error.BaseErrorRespo
 import com.dakson.hr.core.authentication.api.model.response.error.ErrorResponse;
 import com.dakson.hr.core.authentication.infrastructure.exception.CredentialNotValidException;
 import com.dakson.hr.core.authentication.infrastructure.exception.InvalidOrExpiredRefreshTokenExpception;
+import com.dakson.hr.core.user.infrastructure.exception.EmailAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,6 +40,17 @@ public class BadRequestController {
   @ExceptionHandler(exception = InvalidOrExpiredRefreshTokenExpception.class)
   public BaseErrorResponse handleInvalidOrExpiredRefreshTokenExpception(
     InvalidOrExpiredRefreshTokenExpception exception
+  ) {
+    return ErrorResponse.builder()
+      .error(exception.getMessage())
+      .status(HttpStatus.BAD_REQUEST.name())
+      .code(HttpStatus.BAD_REQUEST.value())
+      .build();
+  }
+
+  @ExceptionHandler(exception = EmailAlreadyExistsException.class)
+  public BaseErrorResponse handleEmailAlreadyExistsException(
+    EmailAlreadyExistsException exception
   ) {
     return ErrorResponse.builder()
       .error(exception.getMessage())

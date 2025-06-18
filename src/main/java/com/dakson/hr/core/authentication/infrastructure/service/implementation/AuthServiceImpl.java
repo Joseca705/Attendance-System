@@ -1,7 +1,7 @@
 package com.dakson.hr.core.authentication.infrastructure.service.implementation;
 
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
-import com.dakson.hr.core.authentication.api.model.request.SignUpRequest;
+import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
 import com.dakson.hr.core.authentication.domain.entity.RefreshTokenEntity;
 import com.dakson.hr.core.authentication.domain.repository.RefreshTokenRepository;
@@ -9,8 +9,16 @@ import com.dakson.hr.core.authentication.infrastructure.exception.CredentialNotV
 import com.dakson.hr.core.authentication.infrastructure.exception.InvalidOrExpiredRefreshTokenExpception;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
 import com.dakson.hr.core.authentication.infrastructure.util.JwtUtil;
+import com.dakson.hr.core.authorization.domain.constant.Role;
+import com.dakson.hr.core.authorization.domain.entity.RoleEntity;
+import com.dakson.hr.core.authorization.domain.entity.UserRoleEntity;
+import com.dakson.hr.core.authorization.domain.repository.UserRoleEntityRepository;
 import com.dakson.hr.core.user.api.model.response.AuthUserFlatDto;
+import com.dakson.hr.core.user.domain.entity.PersonEntity;
+import com.dakson.hr.core.user.domain.entity.UserEntity;
+import com.dakson.hr.core.user.domain.repository.PersonEntityRepository;
 import com.dakson.hr.core.user.domain.repository.UserEntityRepository;
+import com.dakson.hr.core.user.infrastructure.exception.EmailAlreadyExistsException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -26,12 +34,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
 
   private final UserEntityRepository userRepository;
+  private final PersonEntityRepository personRepository;
+  private final UserRoleEntityRepository userRoleRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
@@ -72,9 +83,54 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
   }
 
   @Override
-  public String signUp(SignUpRequest request) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'signUp'");
+  @Transactional
+  public AuthenticationResponseDto signUp(SignUpRequestDto request) {
+    boolean existsEmail = this.userRepository.existsByEmail(request.email());
+    if (existsEmail) throw new EmailAlreadyExistsException();
+
+    PersonEntity createdPerson = new PersonEntity(
+      request.firstName(),
+      request.lastName()
+    );
+    createdPerson.setCreatedBy(0);
+    this.personRepository.save(createdPerson);
+
+    UserEntity createdUser = new UserEntity(
+      request.email(),
+      passwordEncoder.encode(request.password()),
+      request.email(),
+      createdPerson
+    );
+    createdUser.setCreatedBy(0);
+    this.userRepository.save(createdUser);
+
+    UserRoleEntity userRole = new UserRoleEntity(
+      new RoleEntity(2),
+      createdUser
+    );
+    userRole.setCreatedBy(0);
+    this.userRoleRepository.save(userRole);
+
+    List<SimpleGrantedAuthority> authority = List.of(
+      new SimpleGrantedAuthority(Role.USER.name())
+    );
+
+    UsernamePasswordAuthenticationToken authentication =
+      new UsernamePasswordAuthenticationToken(
+        createdUser.getId(),
+        createdUser.getPassword(),
+        authority
+      );
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    String token = jwtUtil.createToken(createdUser.getId(), Role.USER.name());
+
+    RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
+    refreshTokenEntity.setGrantId(createdUser.getId());
+    refreshTokenEntity.setExpiresAt(Instant.now().plusSeconds(3600));
+    this.refreshTokenRepository.save(refreshTokenEntity);
+
+    return new AuthenticationResponseDto(token, refreshTokenEntity.getId());
   }
 
   @Override
