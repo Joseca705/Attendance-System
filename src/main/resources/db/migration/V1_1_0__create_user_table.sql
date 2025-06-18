@@ -12,4 +12,5 @@ INSERT INTO users (username, password, email, person_id, created_at, created_by,
 
 INSERT INTO user_roles (user_id, role_id, created_at, created_by, status) VALUES
 (1, 1, now(), 0, 'ACTIVE'),
+(1, 2, now(), 0, 'ACTIVE'),
 (2, 2, now(), 0, 'ACTIVE');

@@ -24,5 +24,22 @@ public interface UserEntityRepository
     WHERE u.username = :username
     """
   )
-  List<AuthUserFlatDto> findingFlatByUsername(@Param("username") String username);
+  List<AuthUserFlatDto> findFlatByUsername(
+    @Param("username") String username
+  );
+
+  @Query(
+    """
+    SELECT new com.dakson.hr.core.user.api.model.response.AuthUserFlatDto(
+    u.id,
+    u.password,
+    r.role
+    )
+    FROM UserEntity u
+    JOIN u.roles ur
+    JOIN ur.role r
+    WHERE u.id = :id
+    """
+  )
+  List<AuthUserFlatDto> findFlatByUserId(@Param("id") Integer id);
 }

@@ -5,10 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,22 +23,23 @@ import lombok.NoArgsConstructor;
 public class RefreshTokenEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(updatable = false, nullable = false)
+  private UUID id;
 
   @Column(name = "grant_id", nullable = false)
   private Integer grantId;
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(nullable = false)
-  private LocalDateTime iat;
+  @Column(nullable = false, updatable = false)
+  private Instant iat;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "expires_at", nullable = false)
-  private LocalDateTime expiresAt;
+  private Instant expiresAt;
 
-  @Column(name = "is_reboked", nullable = false)
-  private Boolean isRevoked;
-
-  private String data;
+  @PrePersist
+  void prePersist() {
+    this.iat = Instant.now();
+  }
 }
