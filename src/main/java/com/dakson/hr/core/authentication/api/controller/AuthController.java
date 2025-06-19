@@ -1,16 +1,20 @@
 package com.dakson.hr.core.authentication.api.controller;
 
 import com.dakson.hr.common.util.CurrentUserJwtUtil;
+import com.dakson.hr.core.authentication.api.model.request.ChangePasswordRequestDto;
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
+import com.dakson.hr.core.authentication.api.model.response.BaseResponseDto;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +46,7 @@ public class AuthController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/signup")
   public ResponseEntity<AuthenticationResponseDto> signUp(
     @RequestBody SignUpRequestDto newUser
@@ -52,5 +57,14 @@ public class AuthController {
     return ResponseEntity.created(
       URI.create(String.format("/api/user/%s", currentUser))
     ).body(createdUser);
+  }
+
+  @PreAuthorize("hasRole('USER')")
+  @PatchMapping("/change-password")
+  public ResponseEntity<BaseResponseDto> changePassword(
+    @RequestBody ChangePasswordRequestDto password
+  ) {
+    BaseResponseDto response = this.jwtAuthService.changePassword(password);
+    return ResponseEntity.ok(response);
   }
 }

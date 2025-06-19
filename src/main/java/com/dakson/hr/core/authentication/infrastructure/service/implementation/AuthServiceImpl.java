@@ -1,9 +1,13 @@
 package com.dakson.hr.core.authentication.infrastructure.service.implementation;
 
+import com.dakson.hr.app.jobs.domain.entity.Job;
 import com.dakson.hr.app.location.domain.entity.Department;
+import com.dakson.hr.common.util.CurrentUserJwtUtil;
+import com.dakson.hr.core.authentication.api.model.request.ChangePasswordRequestDto;
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
+import com.dakson.hr.core.authentication.api.model.response.BaseResponseDto;
 import com.dakson.hr.core.authentication.domain.entity.RefreshTokenEntity;
 import com.dakson.hr.core.authentication.domain.repository.RefreshTokenRepository;
 import com.dakson.hr.core.authentication.infrastructure.exception.CredentialNotValidException;
@@ -47,6 +51,8 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+
+  private final String DEFAULT_PASSWORD = "123456789";
 
   @Override
   public AuthenticationResponseDto login(LoginRequest request) {
@@ -98,26 +104,23 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
       request.hireDate(),
       request.salary(),
       new Department(request.departmentId()),
-      new Employee(request.managerId())
+      new Employee(request.managerId()),
+      new Job(request.jobId())
     );
-    // TODO: Remove the created by 0, put the user creator instead
-    createdeEmployee.setCreatedBy(0);
     this.employeeRepository.save(createdeEmployee);
 
     UserEntity createdUser = new UserEntity(
       request.email(),
-      passwordEncoder.encode("123"),
+      passwordEncoder.encode(DEFAULT_PASSWORD),
       createdeEmployee
     );
-    createdUser.setCreatedBy(0);
     this.userRepository.save(createdUser);
 
-    UserRoleEntity userRole = new UserRoleEntity(
+    UserRoleEntity roleUser = new UserRoleEntity(
       new RoleEntity(2),
       createdUser
     );
-    userRole.setCreatedBy(0);
-    this.userRoleRepository.save(userRole);
+    this.userRoleRepository.save(roleUser);
 
     List<SimpleGrantedAuthority> authority = List.of(
       new SimpleGrantedAuthority(Role.USER.name())
@@ -142,7 +145,7 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
   }
 
   @Override
-  public String logout() {
+  public BaseResponseDto logout() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'logout'");
   }
@@ -192,5 +195,16 @@ public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
       this.jwtUtil.createToken(refreshTokenEntity.getGrantId(), authorities);
 
     return new AuthenticationResponseDto(refreshedToken, refreshToken);
+  }
+
+  @Override
+  @Transactional
+  public BaseResponseDto changePassword(ChangePasswordRequestDto request) {
+    Integer currentUser = CurrentUserJwtUtil.getCurrentUserId();
+    this.userRepository.updateUserPassword(
+        passwordEncoder.encode(request.password()),
+        currentUser
+      );
+    return new BaseResponseDto("Password changed successfully.");
   }
 }

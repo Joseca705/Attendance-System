@@ -40,7 +40,8 @@ public class Employee extends BaseEntity implements Serializable {
     LocalDate hireDate,
     BigDecimal salary,
     Department department,
-    Employee manager
+    Employee manager,
+    Job job
   ) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -50,6 +51,7 @@ public class Employee extends BaseEntity implements Serializable {
     this.salary = salary;
     this.department = department;
     this.manager = manager;
+    this.job = job;
   }
 
   @Id

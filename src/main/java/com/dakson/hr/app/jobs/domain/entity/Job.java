@@ -22,6 +22,10 @@ import lombok.NoArgsConstructor;
 @Table(name = "jobs")
 public class Job extends BaseEntity implements Serializable {
 
+  public Job(Integer id) {
+    this.id = id;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;

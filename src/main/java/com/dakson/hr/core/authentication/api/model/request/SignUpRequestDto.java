@@ -11,5 +11,6 @@ public record SignUpRequestDto(
   LocalDate hireDate,
   BigDecimal salary,
   Integer managerId,
-  Integer departmentId
+  Integer departmentId,
+  Integer jobId
 ) {}
