@@ -2,6 +2,7 @@ package com.dakson.hr.app.attendance.infrastructure.service.impl;
 
 import com.dakson.hr.app.attendance.api.model.request.AttendaceRequestDto;
 import com.dakson.hr.app.attendance.domain.constant.AttendaceStatus;
+import com.dakson.hr.app.attendance.domain.dao.AttendanceLogByEmployeeDao;
 import com.dakson.hr.app.attendance.domain.dao.EmployeeChecksDao;
 import com.dakson.hr.app.attendance.domain.entity.AttendanceLog;
 import com.dakson.hr.app.attendance.domain.repository.AttendaceLogRepository;
@@ -14,6 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,5 +95,17 @@ public class AttendanceLogServiceImpl implements IAttendaceLogService {
       );
 
     return new BaseResponseDto("Log attendance created successfully.");
+  }
+
+  @Override
+  public Page<AttendanceLogByEmployeeDao> getAttendanceLogs(
+    Integer employeeId,
+    Pageable pageable
+  ) {
+    Employee employee = new Employee(employeeId);
+    return this.attendaceLogRepository.findByEmployeeOrderByLogDateDesc(
+        employee,
+        pageable
+      );
   }
 }

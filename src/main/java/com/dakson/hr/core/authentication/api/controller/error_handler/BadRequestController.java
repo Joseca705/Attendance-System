@@ -6,6 +6,7 @@ import com.dakson.hr.common.model.response.error.ErrorsResponse;
 import com.dakson.hr.core.authentication.infrastructure.exception.CredentialNotValidException;
 import com.dakson.hr.core.authentication.infrastructure.exception.InvalidOrExpiredRefreshTokenExpception;
 import com.dakson.hr.core.user.infrastructure.exception.EmailAlreadyExistsException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -72,6 +73,25 @@ public class BadRequestController {
       .stream()
       .map(error -> error.getField() + ": " + error.getDefaultMessage())
       .toList();
+    return ErrorsResponse.builder()
+      .errors(errors)
+      .status(HttpStatus.BAD_REQUEST.name())
+      .code(HttpStatus.BAD_REQUEST.value())
+      .build();
+  }
+
+  // TODO: It doesn't work
+  @ExceptionHandler(ConstraintViolationException.class)
+  public BaseErrorResponse handleConstraintViolation(ConstraintViolationException ex) {
+    List<String> errors = ex.getConstraintViolations()
+      .stream()
+      .map(violation -> {
+        String[] path = violation.getPropertyPath().toString().split("\\.");
+        return path[path.length - 1] + ": " + violation.getMessage();
+      })
+      .toList();
+    
+    
     return ErrorsResponse.builder()
       .errors(errors)
       .status(HttpStatus.BAD_REQUEST.name())
