@@ -1,4 +1,4 @@
-package com.dakson.hr.core.authentication.api.model.response.error;
+package com.dakson.hr.common.model.response.error;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;

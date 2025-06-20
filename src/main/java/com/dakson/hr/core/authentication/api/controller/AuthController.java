@@ -1,11 +1,11 @@
 package com.dakson.hr.core.authentication.api.controller;
 
+import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.common.util.CurrentUserJwtUtil;
 import com.dakson.hr.core.authentication.api.model.request.ChangePasswordRequestDto;
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
-import com.dakson.hr.core.authentication.api.model.response.BaseResponseDto;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
 import jakarta.validation.Valid;
 import java.net.URI;
