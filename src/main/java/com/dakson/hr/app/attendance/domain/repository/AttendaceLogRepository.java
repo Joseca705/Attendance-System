@@ -27,21 +27,20 @@ public interface AttendaceLogRepository
     """
   )
   Optional<EmployeeChecksDao> findFlatByEmployeeIdAndLogDate(
-    @Param("employeeId") Integer employeeId,
+    @Param("employeeId") Long employeeId,
     @Param("logDate") LocalDate logDate
   );
 
   @Query(
     """
     UPDATE AttendanceLog al
-    SET al.checkOutTime = :checkOutTime, al.remarks = :remarks
+    SET al.checkOutTime = :checkOutTime
     WHERE al.id = :id
     """
   )
   @Modifying
   void updateCheckOut(
     @Param("checkOutTime") LocalTime checkOutTime,
-    @Param("remarks") String remarks,
     @Param("id") Long id
   );
 

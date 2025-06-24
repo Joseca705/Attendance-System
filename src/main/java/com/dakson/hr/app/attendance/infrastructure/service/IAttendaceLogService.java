@@ -7,9 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IAttendaceLogService {
-  BaseResponseDto registerCheckIn(AttendaceRequestDto attendance);
-
-  BaseResponseDto registerCheckOut(AttendaceRequestDto attendance);
+  BaseResponseDto registerChecks(AttendaceRequestDto attendance);
 
   Page<AttendanceLogByEmployeeDao> getAttendanceLogs(
     Integer employeeId,

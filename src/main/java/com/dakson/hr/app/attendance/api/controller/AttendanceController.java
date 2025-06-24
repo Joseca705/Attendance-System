@@ -27,19 +27,11 @@ public class AttendanceController {
 
   private final IAttendaceLogService attendaceLogService;
 
-  @PostMapping("/check-in")
-  public ResponseEntity<BaseResponseDto> registerCheckIn(
+  @PostMapping("/check-in-out")
+  public ResponseEntity<BaseResponseDto> registerCheckInOut(
     @Valid @RequestBody AttendaceRequestDto attendance
   ) {
-    BaseResponseDto response = attendaceLogService.registerCheckIn(attendance);
-    return ResponseEntity.ok(response);
-  }
-
-  @PostMapping("/check-out")
-  public ResponseEntity<BaseResponseDto> registerCheckOut(
-    @Valid @RequestBody AttendaceRequestDto attendance
-  ) {
-    BaseResponseDto response = attendaceLogService.registerCheckOut(attendance);
+    BaseResponseDto response = attendaceLogService.registerChecks(attendance);
     return ResponseEntity.ok(response);
   }
 

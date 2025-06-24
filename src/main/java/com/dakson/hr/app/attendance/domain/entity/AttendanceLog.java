@@ -58,7 +58,4 @@ public class AttendanceLog implements Serializable {
 
   @Enumerated(EnumType.STRING)
   private AttendaceStatus status;
-
-  @Column(length = 100, nullable = true)
-  private String remarks;
 }

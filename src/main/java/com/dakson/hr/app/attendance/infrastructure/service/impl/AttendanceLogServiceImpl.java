@@ -7,12 +7,13 @@ import com.dakson.hr.app.attendance.domain.dao.EmployeeChecksDao;
 import com.dakson.hr.app.attendance.domain.entity.AttendanceLog;
 import com.dakson.hr.app.attendance.domain.repository.AttendaceLogRepository;
 import com.dakson.hr.app.attendance.infrastructure.exception.AlreadyCheckedException;
-import com.dakson.hr.app.attendance.infrastructure.exception.AttendanceLogNotFoundException;
 import com.dakson.hr.app.attendance.infrastructure.service.IAttendaceLogService;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.core.user.domain.entity.Employee;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -32,69 +33,64 @@ public class AttendanceLogServiceImpl implements IAttendaceLogService {
   @Value("${application.attendance.check-out-time}")
   private LocalTime checkOutTime;
 
-  @Override
   @Transactional
-  public BaseResponseDto registerCheckIn(AttendaceRequestDto attendance) {
-    LocalDate today = LocalDate.now();
+  @Override
+  public BaseResponseDto registerChecks(AttendaceRequestDto attendance) {
+    LocalDateTime timestamp = attendance.timestamp();
+    LocalDate today = timestamp.toLocalDate();
+    LocalTime now = timestamp.toLocalTime();
+    Long employeeId = attendance.employeeId();
 
-    this.attendaceLogRepository.findFlatByEmployeeIdAndLogDate(
-        attendance.employeeId(),
-        today
-      ).ifPresent(log -> {
-        if (log.getCheckInTime() != null) throw new AlreadyCheckedException(
-          "Already checked in today."
-        );
-      });
+    // Single query to get existing attendance record
+    Optional<EmployeeChecksDao> existingRecord =
+      attendaceLogRepository.findFlatByEmployeeIdAndLogDate(employeeId, today);
 
-    Employee currentEmployee = new Employee(attendance.employeeId());
+    if (existingRecord.isEmpty()) {
+      // No record exists - perform check-in
+      registerCheckIn(employeeId, today, now);
+      return new BaseResponseDto("Checked in successfully");
+    }
+    EmployeeChecksDao recordEmployee = existingRecord.get();
 
-    LocalTime now = LocalTime.now();
+    // Validate check-in time (must be at least 1 hour ago to allow check-out)
+    if (recordEmployee.getCheckInTime().plusHours(1).isAfter(now)) {
+      throw new AlreadyCheckedException(
+        "Check-out is only allowed after 1 hour from check-in"
+      );
+    }
+    // Check if already checked out
+    if (recordEmployee.getCheckOutTime() != null) {
+      throw new AlreadyCheckedException("Already checked-out today");
+    }
+
+    registerCheckOut(employeeId, now);
+
+    return new BaseResponseDto("Checked out successfully");
+  }
+
+  private void registerCheckIn(
+    Long employeeId,
+    LocalDate today,
+    LocalTime now
+  ) {
+    Employee currentEmployee = new Employee((int) (long) employeeId);
+    // Determine status based on check-in time
+    AttendaceStatus status = now.isBefore(checkInTime.plusMinutes(6))
+      ? AttendaceStatus.Present
+      : AttendaceStatus.Late;
+
     AttendanceLog attendanceLog = AttendanceLog.builder()
       .employee(currentEmployee)
       .logDate(today)
       .checkInTime(now)
+      .status(status)
       .build();
 
-    LocalTime cutoff = LocalTime.of(8, 36);
-    if (now.isBefore(cutoff)) {
-      attendanceLog.setStatus(AttendaceStatus.Present);
-    } else {
-      attendanceLog.setStatus(AttendaceStatus.Late);
-    }
-
-    if (attendance.remarks() != null) {
-      attendanceLog.setRemarks(attendance.remarks());
-    }
-
     this.attendaceLogRepository.save(attendanceLog);
-
-    return new BaseResponseDto("Log attendance created successfully.");
   }
 
-  @Override
-  @Transactional
-  public BaseResponseDto registerCheckOut(AttendaceRequestDto attendance) {
-    LocalDate today = LocalDate.now();
-
-    EmployeeChecksDao employeeChecks =
-      this.attendaceLogRepository.findFlatByEmployeeIdAndLogDate(
-          attendance.employeeId(),
-          today
-        ).orElseThrow(AttendanceLogNotFoundException::new);
-
-    if (
-      employeeChecks.getCheckOutTime() != null
-    ) throw new AlreadyCheckedException("Already checked out today.");
-
-    LocalTime now = LocalTime.now();
-
-    this.attendaceLogRepository.updateCheckOut(
-        now,
-        attendance.remarks(),
-        employeeChecks.getId()
-      );
-
-    return new BaseResponseDto("Log attendance created successfully.");
+  private void registerCheckOut(Long employeeId, LocalTime now) {
+    this.attendaceLogRepository.updateCheckOut(now, employeeId);
   }
 
   @Override
