@@ -7,6 +7,14 @@ import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
@@ -25,11 +33,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
+@Tag(
+  name = "Authentication",
+  description = "APIs for user authentication and authorization"
+)
 public class AuthController {
 
   private final IJwtAuthService jwtAuthService;
 
   @PostMapping("/login")
+  @Operation(
+    summary = "User login",
+    description = "Authenticate user with username and password"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Login successful",
+        content = @Content(
+          schema = @Schema(implementation = AuthenticationResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid credentials"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    }
+  )
   public ResponseEntity<AuthenticationResponseDto> handleLogin(
     @Valid @RequestBody LoginRequest loginRequest
   ) {
@@ -39,8 +68,28 @@ public class AuthController {
   }
 
   @GetMapping("/refresh-token")
+  @Operation(
+    summary = "Refresh access token",
+    description = "Get a new access token using a valid refresh token"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Token refreshed successfully",
+        content = @Content(
+          schema = @Schema(implementation = AuthenticationResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid refresh token"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    }
+  )
   public ResponseEntity<AuthenticationResponseDto> refreshToken(
-    @RequestParam(name = "refresh-token") @NotNull(
+    @Parameter(
+      description = "Refresh token",
+      example = "123e4567-e89b-12d3-a456-426614174000"
+    ) @RequestParam(name = "refresh-token") @NotNull(
       message = "Refresh token is required"
     ) UUID refreshToken
   ) {
@@ -51,6 +100,28 @@ public class AuthController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/signup")
+  @Operation(
+    summary = "Create new user",
+    description = "Register a new user (Admin only)"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "201",
+        description = "User created successfully",
+        content = @Content(
+          schema = @Schema(implementation = AuthenticationResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid user data"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(
+        responseCode = "403",
+        description = "Forbidden - Admin role required"
+      ),
+    }
+  )
+  @SecurityRequirement(name = "Bearer Authentication")
   public ResponseEntity<AuthenticationResponseDto> signUp(
     @Valid @RequestBody SignUpRequestDto newUser
   ) {
@@ -64,6 +135,25 @@ public class AuthController {
 
   @PreAuthorize("hasRole('USER')")
   @PatchMapping("/change-password")
+  @Operation(
+    summary = "Change password",
+    description = "Change user password (Authenticated users only)"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Password changed successfully",
+        content = @Content(
+          schema = @Schema(implementation = BaseResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid password"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
+  @SecurityRequirement(name = "Bearer Authentication")
   public ResponseEntity<BaseResponseDto> changePassword(
     @Valid @RequestBody ChangePasswordRequestDto password
   ) {
