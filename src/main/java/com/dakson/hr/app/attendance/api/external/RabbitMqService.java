@@ -2,13 +2,14 @@ package com.dakson.hr.app.attendance.api.external;
 
 import com.dakson.hr.app.attendance.api.model.request.AttendaceRequestDto;
 import com.dakson.hr.app.attendance.infrastructure.service.IAttendaceLogService;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class RabbitMqService {
 
@@ -20,11 +21,11 @@ public class RabbitMqService {
     try {
       var violations = validator.validate(message);
       if (!violations.isEmpty()) {
-        throw new ConstraintViolationException(violations);
+        log.error("Validation errors: {}", violations);
       }
       attendaceLogService.registerChecks(message);
     } catch (Exception e) {
-      System.out.println(e.getLocalizedMessage());
+      log.error("Error processing fingerprint data: {}", message, e);
     }
   }
 }

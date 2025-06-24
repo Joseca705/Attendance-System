@@ -8,6 +8,7 @@ import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
 import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,9 @@ public class AuthController {
 
   @GetMapping("/refresh-token")
   public ResponseEntity<AuthenticationResponseDto> refreshToken(
-    @RequestParam(name = "refresh-token") UUID refreshToken
+    @RequestParam(name = "refresh-token") @NotNull(
+      message = "Refresh token is required"
+    ) UUID refreshToken
   ) {
     AuthenticationResponseDto response =
       this.jwtAuthService.refreshToken(refreshToken);
@@ -49,7 +52,7 @@ public class AuthController {
   @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/signup")
   public ResponseEntity<AuthenticationResponseDto> signUp(
-    @RequestBody SignUpRequestDto newUser
+    @Valid @RequestBody SignUpRequestDto newUser
   ) {
     AuthenticationResponseDto createdUser = this.jwtAuthService.signUp(newUser);
     Integer currentUser = CurrentUserJwtUtil.getCurrentUserId();
@@ -62,7 +65,7 @@ public class AuthController {
   @PreAuthorize("hasRole('USER')")
   @PatchMapping("/change-password")
   public ResponseEntity<BaseResponseDto> changePassword(
-    @RequestBody ChangePasswordRequestDto password
+    @Valid @RequestBody ChangePasswordRequestDto password
   ) {
     BaseResponseDto response = this.jwtAuthService.changePassword(password);
     return ResponseEntity.ok(response);
