@@ -1,4 +1,3 @@
--- 🔹 LOCATIONS
 INSERT INTO locations (created_at, created_by, status, city, street_address)
 VALUES
 (NOW(), 0, 'ACTIVE', 'New York', '123 Main St'),
