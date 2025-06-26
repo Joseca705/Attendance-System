@@ -18,7 +18,7 @@ public record LoginRequest(
   @Schema(description = "Password", example = "password123")
   @NotBlank(message = "Password is required")
   @Size(
-    min = 6,
+    min = 3,
     max = 100,
     message = "Password must be between 6 and 100 characters"
   )

@@ -30,6 +30,12 @@ public class Department extends BaseEntity implements Serializable {
     this.id = id;
   }
 
+  public Department(String name, Location location, Employee manager) {
+    this.name = name;
+    this.location = location;
+    this.manager = manager;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;

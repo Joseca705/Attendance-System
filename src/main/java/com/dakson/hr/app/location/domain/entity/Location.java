@@ -21,6 +21,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "locations")
 public class Location extends BaseEntity implements Serializable {
 
+  public Location(String city, String streetAddress) {
+    this.city = city;
+    this.streetAddress = streetAddress;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
