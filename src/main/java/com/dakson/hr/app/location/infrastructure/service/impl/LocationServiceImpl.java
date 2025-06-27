@@ -3,15 +3,18 @@ package com.dakson.hr.app.location.infrastructure.service.impl;
 import com.dakson.hr.app.location.api.model.request.CreateLocationRequestDto;
 import com.dakson.hr.app.location.api.model.request.UpdateLocationRequestDto;
 import com.dakson.hr.app.location.api.model.response.LocationResponseDto;
+import com.dakson.hr.app.location.domain.entity.Location;
 import com.dakson.hr.app.location.domain.repository.LocationRepository;
 import com.dakson.hr.app.location.infrastructure.service.ILocationService;
 import com.dakson.hr.common.exception.ResourceNotFoundException;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class LocationServiceImpl implements ILocationService {
@@ -22,43 +25,56 @@ public class LocationServiceImpl implements ILocationService {
   @Transactional
   @Override
   public LocationResponseDto create(CreateLocationRequestDto body) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
+    Location createdLocation =
+      this.locationRepository.save(modelMapper.map(body, Location.class));
+    return modelMapper.map(createdLocation, LocationResponseDto.class);
   }
 
   @Transactional(readOnly = true)
   @Override
   public LocationResponseDto findById(Integer id) {
-    return modelMapper.map(
-      locationRepository
-        .findById(id)
-        .orElseThrow(() ->
+    Location locationFound =
+      this.locationRepository.findById(id).orElseThrow(() ->
           new ResourceNotFoundException(
-            String.format("Location with id %s not found", id)
+            String.format("Location with id %s not found.", id)
           )
-        ),
-      LocationResponseDto.class
-    );
+        );
+    return modelMapper.map(locationFound, LocationResponseDto.class);
   }
 
   @Transactional
   @Override
-  public LocationResponseDto updateById(
-    UpdateLocationRequestDto body,
-    Integer id
-  ) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'updateById'"
-    );
+  public BaseResponseDto updateById(UpdateLocationRequestDto body, Integer id) {
+    Location locationFound =
+      this.locationRepository.findById(id).orElseThrow(() ->
+          new ResourceNotFoundException(
+            String.format("Location with id %s not found.", id)
+          )
+        );
+    if (body.getCity() != null) {
+      locationFound.setCity(body.getCity());
+    }
+    if (body.getStreetAddress() != null) {
+      locationFound.setStreetAddress(body.getStreetAddress());
+    }
+
+    this.locationRepository.save(locationFound);
+    return BaseResponseDto.builder()
+      .message("Location updated successfully")
+      .build();
   }
 
   @Transactional
   @Override
   public BaseResponseDto deleteById(Integer id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'deleteById'"
-    );
+    this.locationRepository.findById(id).orElseThrow(() ->
+        new ResourceNotFoundException(
+          String.format("Location with id %s not found.", id)
+        )
+      );
+    this.locationRepository.deleteLocationRegister(id);
+    return BaseResponseDto.builder()
+      .message("Location deleted successfully")
+      .build();
   }
 }

@@ -13,7 +13,7 @@ public interface ILocationService
       UpdateLocationRequestDto,
       LocationResponseDto,
       LocationResponseDto,
-      LocationResponseDto,
+      BaseResponseDto,
       BaseResponseDto,
       Integer
     > {}
