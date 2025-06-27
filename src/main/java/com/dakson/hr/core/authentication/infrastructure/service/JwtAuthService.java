@@ -8,7 +8,7 @@ import com.dakson.hr.core.authentication.api.model.response.AuthenticationRespon
 import com.dakson.hr.core.authentication.infrastructure.abstract_service.AuthService;
 import java.util.UUID;
 
-public interface IJwtAuthService
+public interface JwtAuthService
   extends
     AuthService<
       LoginRequest,

@@ -7,7 +7,7 @@ import com.dakson.hr.app.attendance.domain.dao.EmployeeChecksDao;
 import com.dakson.hr.app.attendance.domain.entity.AttendanceLog;
 import com.dakson.hr.app.attendance.domain.repository.AttendaceLogRepository;
 import com.dakson.hr.app.attendance.infrastructure.exception.AlreadyCheckedException;
-import com.dakson.hr.app.attendance.infrastructure.service.IAttendaceLogService;
+import com.dakson.hr.app.attendance.infrastructure.service.AttendaceLogService;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.core.user.domain.entity.Employee;
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-public class AttendanceLogServiceImpl implements IAttendaceLogService {
+public class AttendanceLogServiceImpl implements AttendaceLogService {
 
   private final AttendaceLogRepository attendaceLogRepository;
 

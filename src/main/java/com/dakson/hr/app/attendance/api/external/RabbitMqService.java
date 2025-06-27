@@ -1,7 +1,7 @@
 package com.dakson.hr.app.attendance.api.external;
 
 import com.dakson.hr.app.attendance.api.model.request.AttendaceRequestDto;
-import com.dakson.hr.app.attendance.infrastructure.service.IAttendaceLogService;
+import com.dakson.hr.app.attendance.infrastructure.service.AttendaceLogService;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RabbitMqService {
 
-  private final IAttendaceLogService attendaceLogService;
+  private final AttendaceLogService attendaceLogService;
   private final Validator validator;
 
   @RabbitListener(queues = "${fingerprint.queue}")

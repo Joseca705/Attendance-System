@@ -12,7 +12,7 @@ import com.dakson.hr.core.authentication.domain.entity.RefreshTokenEntity;
 import com.dakson.hr.core.authentication.domain.repository.RefreshTokenRepository;
 import com.dakson.hr.core.authentication.infrastructure.exception.CredentialNotValidException;
 import com.dakson.hr.core.authentication.infrastructure.exception.InvalidOrExpiredRefreshTokenExpception;
-import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
+import com.dakson.hr.core.authentication.infrastructure.service.JwtAuthService;
 import com.dakson.hr.core.authentication.infrastructure.util.JwtUtil;
 import com.dakson.hr.core.authorization.domain.constant.Role;
 import com.dakson.hr.core.authorization.domain.entity.RoleEntity;
@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-public class AuthServiceImpl implements IJwtAuthService, UserDetailsService {
+public class AuthServiceImpl implements JwtAuthService, UserDetailsService {
 
   private final UserEntityRepository userRepository;
   private final EmployeeRepository employeeRepository;

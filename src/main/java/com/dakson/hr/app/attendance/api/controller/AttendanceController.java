@@ -2,11 +2,10 @@ package com.dakson.hr.app.attendance.api.controller;
 
 import com.dakson.hr.app.attendance.api.model.request.AttendaceRequestDto;
 import com.dakson.hr.app.attendance.domain.dao.AttendanceLogByEmployeeDao;
-import com.dakson.hr.app.attendance.infrastructure.service.IAttendaceLogService;
+import com.dakson.hr.app.attendance.infrastructure.service.AttendaceLogService;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.common.util.CurrentUserJwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,18 +13,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -37,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AttendanceController {
 
-  private final IAttendaceLogService attendaceLogService;
+  private final AttendaceLogService attendaceLogService;
 
   @PostMapping("/check-in-out")
   @Operation(
@@ -86,17 +83,9 @@ public class AttendanceController {
   )
   @SecurityRequirement(name = "Bearer Authentication")
   public ResponseEntity<Page<AttendanceLogByEmployeeDao>> getAttendanceLogs(
-    @Parameter(
-      description = "Page number (0-based)",
-      example = "0"
-    ) @RequestParam(defaultValue = "0") @Min(0) Integer page,
-    @Parameter(
-      description = "Number of items per page",
-      example = "10"
-    ) @RequestParam(defaultValue = "10") @Min(1) Integer size
+    @PageableDefault(size = 10, sort = "id") Pageable pageable
   ) {
     Integer employeeId = CurrentUserJwtUtil.getCurrentUserId();
-    Pageable pageable = PageRequest.of(page, size);
     return ResponseEntity.ok(
       attendaceLogService.getAttendanceLogs(employeeId, pageable)
     );

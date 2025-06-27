@@ -1,6 +1,9 @@
 package com.dakson.hr.app.location.domain.repository;
 
 import com.dakson.hr.app.location.domain.entity.Location;
+import com.dakson.hr.common.constant.Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +19,6 @@ public interface LocationRepository extends JpaRepository<Location, Integer> {
         """
   )
   void deleteLocationRegister(@Param("id") Integer id);
+
+  Page<Location> findByStatus(Status status, Pageable pageable);
 }

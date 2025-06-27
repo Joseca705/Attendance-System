@@ -6,7 +6,7 @@ import com.dakson.hr.core.authentication.api.model.request.ChangePasswordRequest
 import com.dakson.hr.core.authentication.api.model.request.LoginRequest;
 import com.dakson.hr.core.authentication.api.model.request.SignUpRequestDto;
 import com.dakson.hr.core.authentication.api.model.response.AuthenticationResponseDto;
-import com.dakson.hr.core.authentication.infrastructure.service.IJwtAuthService;
+import com.dakson.hr.core.authentication.infrastructure.service.JwtAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AuthController {
 
-  private final IJwtAuthService jwtAuthService;
+  private final JwtAuthService jwtAuthService;
 
   @PostMapping("/login")
   @Operation(
