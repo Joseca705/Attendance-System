@@ -6,7 +6,6 @@ import com.dakson.hr.app.location.api.model.response.DetailedDepartmentResponseD
 import com.dakson.hr.app.location.infrastructure.service.DepartmentService;
 import com.dakson.hr.common.model.request.IdRequestDto;
 import com.dakson.hr.common.model.response.BaseResponseDto;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,26 +60,26 @@ public class DepartmentController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @PatchMapping("/{id}/manager")
+  @PatchMapping("/{departmentId}/manager")
   public ResponseEntity<BaseResponseDto> assignManagerToDepartment(
-    @PathVariable Integer id,
+    @PathVariable Integer departmentId,
     @RequestBody @Valid IdRequestDto managerId
   ) {
     BaseResponseDto response = departmentService.assignManagerToDepartment(
-      id,
+      departmentId,
       managerId.getId()
     );
     return ResponseEntity.ok(response);
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @PatchMapping("/{id}/location")
+  @PatchMapping("/{departmentId}/location")
   public ResponseEntity<BaseResponseDto> changeDepartmentLocation(
-    @PathVariable Integer id,
+    @PathVariable Integer departmentId,
     @RequestBody @Valid IdRequestDto locationId
   ) {
     BaseResponseDto response = departmentService.changeDepartmentLocation(
-      id,
+      departmentId,
       locationId.getId()
     );
     return ResponseEntity.ok(response);

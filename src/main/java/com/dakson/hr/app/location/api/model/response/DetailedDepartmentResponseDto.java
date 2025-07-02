@@ -13,29 +13,26 @@ public class DetailedDepartmentResponseDto {
 
   private String name;
 
-  private EmployeeDetailedDepartmentResponseDto manager;
+  private Employee manager;
 
-  private DetailedLocationResponseDto location;
-}
+  private Location location;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-class EmployeeDetailedDepartmentResponseDto {
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Employee {
 
-  private Integer id;
+    private Integer id;
+    private String firstName;
+    private String lastName;
+  }
 
-  private String firstName;
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Location {
 
-  private String lastName;
-}
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-class DetailedLocationResponseDto {
-
-  private Integer id;
-
-  private String name;
+    private Integer id;
+    private String name;
+  }
 }
