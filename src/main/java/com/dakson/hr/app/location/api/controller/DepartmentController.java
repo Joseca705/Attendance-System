@@ -1,6 +1,7 @@
 package com.dakson.hr.app.location.api.controller;
 
 import com.dakson.hr.app.location.api.model.request.CreateDepartmentRequestDto;
+import com.dakson.hr.app.location.api.model.request.UpdateDepartmentRequestDto;
 import com.dakson.hr.app.location.api.model.response.DepartmentResponseDto;
 import com.dakson.hr.app.location.api.model.response.DetailedDepartmentResponseDto;
 import com.dakson.hr.app.location.infrastructure.service.DepartmentService;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +62,19 @@ public class DepartmentController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
+  @PatchMapping("/{departmentId}")
+  public ResponseEntity<BaseResponseDto> updateDepartment(
+    @PathVariable Integer departmentId,
+    @RequestBody @Valid UpdateDepartmentRequestDto updateDepartment
+  ) {
+    BaseResponseDto response = departmentService.updateById(
+      updateDepartment,
+      departmentId
+    );
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{departmentId}/manager")
   public ResponseEntity<BaseResponseDto> assignManagerToDepartment(
     @PathVariable Integer departmentId,
@@ -82,6 +97,15 @@ public class DepartmentController {
       departmentId,
       locationId.getId()
     );
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @DeleteMapping("/{departmentId}")
+  public ResponseEntity<BaseResponseDto> deleteDepartmentById(
+    @PathVariable Integer departmentId
+  ) {
+    BaseResponseDto response = departmentService.deleteById(departmentId);
     return ResponseEntity.ok(response);
   }
 }

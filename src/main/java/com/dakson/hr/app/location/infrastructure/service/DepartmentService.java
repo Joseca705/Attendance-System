@@ -1,6 +1,7 @@
 package com.dakson.hr.app.location.infrastructure.service;
 
 import com.dakson.hr.app.location.api.model.request.CreateDepartmentRequestDto;
+import com.dakson.hr.app.location.api.model.request.UpdateDepartmentRequestDto;
 import com.dakson.hr.app.location.api.model.response.DepartmentResponseDto;
 import com.dakson.hr.app.location.api.model.response.DetailedDepartmentResponseDto;
 import com.dakson.hr.common.model.response.BaseResponseDto;
@@ -12,7 +13,7 @@ public interface DepartmentService
   extends
     CrudService<
       CreateDepartmentRequestDto,
-      Object,
+      UpdateDepartmentRequestDto,
       DepartmentResponseDto,
       DetailedDepartmentResponseDto,
       BaseResponseDto,

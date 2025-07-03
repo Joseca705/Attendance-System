@@ -1,19 +1,26 @@
 package com.dakson.hr.app.location.infrastructure.service.impl;
 
 import com.dakson.hr.app.location.api.model.request.CreateDepartmentRequestDto;
+import com.dakson.hr.app.location.api.model.request.UpdateDepartmentRequestDto;
 import com.dakson.hr.app.location.api.model.response.DepartmentResponseDto;
 import com.dakson.hr.app.location.api.model.response.DetailedDepartmentResponseDto;
+import com.dakson.hr.app.location.domain.dao.DepartmentResponseDao;
 import com.dakson.hr.app.location.domain.dao.DetailedDepartmentDao;
+import com.dakson.hr.app.location.domain.entity.Department;
+import com.dakson.hr.app.location.domain.entity.Location;
 import com.dakson.hr.app.location.domain.repository.DepartmentRepository;
 import com.dakson.hr.app.location.domain.repository.LocationRepository;
 import com.dakson.hr.app.location.infrastructure.exception.AlreadyAssignedException;
 import com.dakson.hr.app.location.infrastructure.exception.AlreadyAssignedLocationException;
+import com.dakson.hr.app.location.infrastructure.exception.ManagerAlreadyAssignedToDepartmentException;
 import com.dakson.hr.app.location.infrastructure.exception.UserNotFoundException;
 import com.dakson.hr.app.location.infrastructure.service.DepartmentService;
 import com.dakson.hr.common.constant.Status;
 import com.dakson.hr.common.exception.ResourceNotFoundException;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.common.util.CurrentUserJwtUtil;
+import com.dakson.hr.core.user.domain.entity.Employee;
+import com.dakson.hr.core.user.domain.repository.EmployeeRepository;
 import com.dakson.hr.core.user.domain.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +39,55 @@ public class DepartmentServiceImpl implements DepartmentService {
   private final ModelMapper modelMapper;
   private final UserEntityRepository userEntityRepository;
   private final LocationRepository locationRepository;
+  private final EmployeeRepository employeeRepository;
 
   @Transactional
   @Override
   public DepartmentResponseDto create(CreateDepartmentRequestDto body) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
+    // Validate location
+    Location location = locationRepository
+      .findById(body.getLocationId())
+      .filter(l -> l.getStatus() == Status.ACTIVE)
+      .orElseThrow(() ->
+        new ResourceNotFoundException(
+          "Location with id " +
+          body.getLocationId() +
+          " not found or not active."
+        )
+      );
+
+    // Validate manager if provided
+    Employee manager = null;
+    if (body.getManagerId() != null) {
+      manager = employeeRepository
+        .findById(body.getManagerId())
+        .filter(e -> e.getStatus() == Status.ACTIVE)
+        .orElseThrow(() ->
+          new UserNotFoundException(
+            "Manager with id " +
+            body.getManagerId() +
+            " not found or not active."
+          )
+        );
+
+      // Check if manager is already assigned to any department
+      if (
+        departmentRepository.isManagerAssignedToAnyDepartment(
+          body.getManagerId()
+        )
+      ) {
+        throw new ManagerAlreadyAssignedToDepartmentException(
+          "Manager with id " +
+          body.getManagerId() +
+          " is already assigned to another department."
+        );
+      }
+    }
+
+    Department department = new Department(body.getName(), location, manager);
+
+    Department saved = departmentRepository.save(department);
+    return modelMapper.map(saved, DepartmentResponseDto.class);
   }
 
   @Transactional(readOnly = true)
@@ -81,21 +131,43 @@ public class DepartmentServiceImpl implements DepartmentService {
     return dto;
   }
 
+  @Transactional
   @Override
-  public BaseResponseDto updateById(Object body, Integer id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'updateById'"
-    );
+  public BaseResponseDto updateById(
+    UpdateDepartmentRequestDto body,
+    Integer id
+  ) {
+    // Validate department exists and is active
+    if (!departmentRepository.existsByIdAndStatus(id, Status.ACTIVE)) {
+      throw new ResourceNotFoundException(
+        "Department with id " + id + " not found or not active."
+      );
+    }
+
+    Integer updatedBy = CurrentUserJwtUtil.getCurrentUserId();
+    departmentRepository.updateDepartmentName(id, body.getName(), updatedBy);
+
+    return BaseResponseDto.builder()
+      .message("Department updated successfully")
+      .build();
   }
 
   @Transactional
   @Override
   public BaseResponseDto deleteById(Integer id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'deleteById'"
-    );
+    // Validate department exists and is active
+    if (!departmentRepository.existsByIdAndStatus(id, Status.ACTIVE)) {
+      throw new ResourceNotFoundException(
+        "Department with id " + id + " not found or not active."
+      );
+    }
+
+    Integer updatedBy = CurrentUserJwtUtil.getCurrentUserId();
+    departmentRepository.deleteDepartmentById(id, updatedBy);
+
+    return BaseResponseDto.builder()
+      .message("Department deleted successfully")
+      .build();
   }
 
   @Transactional(readOnly = true)
@@ -103,9 +175,9 @@ public class DepartmentServiceImpl implements DepartmentService {
   public Page<DepartmentResponseDto> getPaginatedDepartments(
     Pageable pageable
   ) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'getPaginatedDepartments'"
+    Page<DepartmentResponseDao> daoPage =
+      departmentRepository.findAllByStatusCustom(Status.ACTIVE, pageable);
+    return daoPage.map(dao -> modelMapper.map(dao, DepartmentResponseDto.class)
     );
   }
 
