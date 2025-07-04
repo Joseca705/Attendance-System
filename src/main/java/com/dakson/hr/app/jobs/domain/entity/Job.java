@@ -26,6 +26,12 @@ public class Job extends BaseEntity implements Serializable {
     this.id = id;
   }
 
+  public Job(String name, BigDecimal minSalary, BigDecimal maxSalary) {
+    this.name = name;
+    this.minSalary = minSalary;
+    this.maxSalary = maxSalary;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
