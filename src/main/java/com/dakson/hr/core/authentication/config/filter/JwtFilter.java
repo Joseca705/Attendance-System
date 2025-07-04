@@ -35,21 +35,26 @@ public class JwtFilter extends OncePerRequestFilter {
     if (jwtToken != null) {
       jwtToken = jwtToken.substring(7);
 
-      DecodedJWT decodedJWT = jwtUtil.validateToken(jwtToken);
+      try {
+        DecodedJWT decodedJWT = jwtUtil.validateToken(jwtToken);
 
-      Integer userId = jwtUtil.getSpecificClaim(decodedJWT, "userId").asInt();
-      String stringAuthorities = jwtUtil
-        .getSpecificClaim(decodedJWT, "authorities")
-        .asString();
+        Integer userId = jwtUtil.getSpecificClaim(decodedJWT, "userId").asInt();
+        String stringAuthorities = jwtUtil
+          .getSpecificClaim(decodedJWT, "authorities")
+          .asString();
 
-      Collection<? extends GrantedAuthority> authorities =
-        AuthorityUtils.commaSeparatedStringToAuthorityList(stringAuthorities);
+        Collection<? extends GrantedAuthority> authorities =
+          AuthorityUtils.commaSeparatedStringToAuthorityList(stringAuthorities);
 
-      SecurityContext context = SecurityContextHolder.createEmptyContext();
-      Authentication authenticationToken =
-        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-      context.setAuthentication(authenticationToken);
-      SecurityContextHolder.setContext(context);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Authentication authenticationToken =
+          new UsernamePasswordAuthenticationToken(userId, null, authorities);
+        context.setAuthentication(authenticationToken);
+        SecurityContextHolder.setContext(context);
+      } catch (com.auth0.jwt.exceptions.JWTVerificationException ex) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+      }
     }
     filterChain.doFilter(request, response);
   }

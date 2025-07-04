@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/attendance")
+@RequestMapping("/attendance")
 @Tag(
   name = "Attendance Management",
   description = "APIs for managing employee attendance"
