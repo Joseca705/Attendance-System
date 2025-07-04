@@ -1,5 +1,5 @@
 package com.dakson.hr.core.authentication.infrastructure.service;
 
-public interface IRefreshTokenService {
+public interface RefreshTokenService {
   void deleteExpiredTokens();
 }

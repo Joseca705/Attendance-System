@@ -1,5 +1,6 @@
 package com.dakson.hr.core.user.domain.repository;
 
+import com.dakson.hr.common.constant.Status;
 import com.dakson.hr.core.user.api.model.response.AuthUserFlatDto;
 import com.dakson.hr.core.user.domain.entity.UserEntity;
 import java.util.List;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,7 +48,7 @@ public interface UserEntityRepository
 
   @Query(
     """
-    UPDATE UserEntity u 
+    UPDATE UserEntity u
     SET u.password = :password,
     u.updatedAt = CURRENT_TIMESTAMP
     WHERE u.id = :id
@@ -58,4 +60,6 @@ public interface UserEntityRepository
     @Param("password") String password,
     @Param("id") Integer id
   );
+
+  boolean existsByIdAndStatus(@NonNull Integer id, Status status);
 }
