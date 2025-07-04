@@ -5,6 +5,12 @@ import com.dakson.hr.app.location.api.model.request.UpdateLocationRequestDto;
 import com.dakson.hr.app.location.api.model.response.LocationResponseDto;
 import com.dakson.hr.app.location.infrastructure.service.LocationService;
 import com.dakson.hr.common.model.response.BaseResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +31,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/location")
+@Tag(name = "Location Management", description = "APIs for managing locations")
 public class LocationController {
 
   private final LocationService locationService;
 
   @PreAuthorize("hasRole('ADMIN')")
   @GetMapping
+  @Operation(
+    summary = "Get paginated locations",
+    description = "Retrieve a paginated list of locations"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "List of locations",
+        content = @Content(
+          schema = @Schema(implementation = LocationResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
   public ResponseEntity<Page<LocationResponseDto>> getPaginatedLocations(
     @PageableDefault(size = 10, sort = "id") Pageable pageable
   ) {
@@ -42,6 +66,24 @@ public class LocationController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/{id}")
+  @Operation(
+    summary = "Get location by ID",
+    description = "Retrieve a location by its unique identifier"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Location found",
+        content = @Content(
+          schema = @Schema(implementation = LocationResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "404", description = "Location not found"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
   public ResponseEntity<LocationResponseDto> getLocationById(
     @PathVariable Integer id
   ) {
@@ -51,6 +93,24 @@ public class LocationController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
+  @Operation(
+    summary = "Create a new location",
+    description = "Create a new location record"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "201",
+        description = "Location created",
+        content = @Content(
+          schema = @Schema(implementation = BaseResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid location data"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
   public ResponseEntity<BaseResponseDto> createLocation(
     @RequestBody @Valid CreateLocationRequestDto newLocation
   ) {
@@ -64,6 +124,25 @@ public class LocationController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
+  @Operation(
+    summary = "Update location by ID",
+    description = "Update the details of a location by its unique identifier"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Location updated",
+        content = @Content(
+          schema = @Schema(implementation = BaseResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid location data"),
+      @ApiResponse(responseCode = "404", description = "Location not found"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
   public ResponseEntity<BaseResponseDto> updateLocation(
     @PathVariable Integer id,
     @RequestBody @Valid UpdateLocationRequestDto body
@@ -74,6 +153,24 @@ public class LocationController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
+  @Operation(
+    summary = "Delete location by ID",
+    description = "Delete a location by its unique identifier"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Location deleted",
+        content = @Content(
+          schema = @Schema(implementation = BaseResponseDto.class)
+        )
+      ),
+      @ApiResponse(responseCode = "404", description = "Location not found"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+    }
+  )
   public ResponseEntity<BaseResponseDto> deleteLocation(
     @PathVariable Integer id
   ) {
