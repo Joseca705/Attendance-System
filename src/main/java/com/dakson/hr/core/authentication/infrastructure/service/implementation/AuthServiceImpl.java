@@ -1,6 +1,8 @@
 package com.dakson.hr.core.authentication.infrastructure.service.implementation;
 
+import com.dakson.hr.app.jobs.api.model.request.CreateUpdateJobHistoryRequestDto;
 import com.dakson.hr.app.jobs.domain.entity.Job;
+import com.dakson.hr.app.jobs.infrastructure.service.JobHistoryService;
 import com.dakson.hr.app.location.domain.entity.Department;
 import com.dakson.hr.common.model.response.BaseResponseDto;
 import com.dakson.hr.common.util.CurrentUserJwtUtil;
@@ -51,6 +53,7 @@ public class AuthServiceImpl implements JwtAuthService, UserDetailsService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final JobHistoryService jobHistoryService;
 
   private final String DEFAULT_PASSWORD = "123456789";
 
@@ -108,6 +111,17 @@ public class AuthServiceImpl implements JwtAuthService, UserDetailsService {
       new Job(request.jobId())
     );
     this.employeeRepository.save(createdeEmployee);
+
+    // Create JobHistory for the new employee
+    CreateUpdateJobHistoryRequestDto jobHistoryRequest =
+      CreateUpdateJobHistoryRequestDto.builder()
+        .employeeId(createdeEmployee.getId())
+        .jobId(request.jobId())
+        .departmentId(request.departmentId())
+        .startDate(request.hireDate())
+        .endDate(request.endDate())
+        .build();
+    jobHistoryService.create(jobHistoryRequest);
 
     UserEntity createdUser = new UserEntity(
       request.email(),
