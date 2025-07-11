@@ -1,4 +1,4 @@
-# HR Management System API
+# Attendance System API
 
 A comprehensive Human Resources Management System built with Spring Boot, featuring employee attendance tracking, authentication, robust authorization, and centralized error handling.
 
