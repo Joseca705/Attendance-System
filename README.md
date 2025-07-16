@@ -51,20 +51,6 @@ Once the application is running, access the interactive API documentation at:
 - **Swagger UI**: http://localhost:8080/api/swagger-ui.html
 - **OpenAPI JSON**: http://localhost:8080/api/api-docs
 
-> **Note:** If Swagger UI does not load, ensure your security configuration allows unauthenticated access to `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**`, and `/webjars/**`. Example:
->
-> ```java
-> .authorizeHttpRequests(auth -> auth
->   .requestMatchers(
->       "/swagger-ui.html",
->       "/swagger-ui/**",
->       "/v3/api-docs/**",
->       "/webjars/**"
->   ).permitAll()
->   .anyRequest().authenticated()
-> )
-> ```
-
 ### Available Endpoints
 
 #### Authentication (`/api/auth`) (all endpoints prefixed with `/api`)
@@ -161,14 +147,6 @@ src/main/java/com/dakson/hr/
 ```bash
 mvn test
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
 
 ## License
 
